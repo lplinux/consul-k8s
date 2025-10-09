@@ -3,8 +3,24 @@
 
 # Available parameters and their default values for the Consul chart.
 
+# @param global.imageRegistry Global Docker image registry
+# @param global.imagePullSecrets Global Docker registry secret names as an array
+#
 # Holds values that affect multiple components of the chart.
 global:
+  imageRegistry: ""
+
+  # The image pull policy used globally for images controlled by Consul (consul, consul-dataplane, consul-k8s, consul-telemetry-collector).
+  # One of "IfNotPresent", "Always", "Never", and "". Refer to https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  # @default: ""
+  imagePullPolicy: ""
+
+  # E.g.
+  # imagePullSecrets:
+  #   - myRegistryKeySecretName
+  #
+  imagePullSecrets: []
+
   # The main enabled/disabled setting. If true, servers,
   # clients, Consul DNS and the Consul UI will be enabled. Each component can override
   # this default via its component-specific "enabled" config. If false, no components
@@ -61,37 +77,36 @@ global:
   #
   # ```yaml
   # # Consul 1.10.0
-  # image: "consul:1.10.0"
+  # image:
+  #   registry: ""
+  #   repository: "consul"
+  #   tag: "1.10.0"
   # # Consul Enterprise 1.10.0
-  # image: "hashicorp/consul-enterprise:1.10.0-ent"
+  # image:
+  #   registry: ""
+  #   repository: "hashicorp/consul-enterprise"
+  #   tag: "1.10.0-ent"
   # ```
   # @default: hashicorp/consul:<latest version>
-  image: hashicorp/consul:1.22.0-rc1
-
-  # Array of objects containing image pull secret names that will be applied to each service account.
-  # This can be used to reference image pull secrets if using a custom consul or consul-k8s-control-plane Docker image.
-  # Refer to https://kubernetes.io/docs/concepts/containers/images/#using-a-private-registry.
-  #
-  # Example:
-  #
-  # ```yaml
-  # imagePullSecrets:
-  #   - name: pull-secret-name
-  #   - name: pull-secret-name-2
-  # ```
-  # @type: array<map>
-  imagePullSecrets: []
+  image:
+    # image.registry -- Image registry
+    registry: ""
+    # image.repository -- Image repository
+    repository: hashicorp/consul
+    # image.tag -- Image tag
+    tag: 1.22.0-rc1
 
   # The name (and tag) of the consul-k8s-control-plane Docker
   # image that is used for functionality such as catalog sync.
   # This can be overridden per component.
   # @default: hashicorp/consul-k8s-control-plane:<latest version>
-  imageK8S: hashicorp/consul-k8s-control-plane:1.9.0-rc1
-
-  # The image pull policy used globally for images controlled by Consul (consul, consul-dataplane, consul-k8s, consul-telemetry-collector).
-  # One of "IfNotPresent", "Always", "Never", and "". Refer to https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
-  # @default: ""
-  imagePullPolicy: ""
+  imageK8S:
+    # imageK8S.registry -- Image registry
+    registry: ""
+    # imageK8S.repository -- Image repository
+    repository: hashicorp/consul-k8s-control-plane
+    # imageK8S.tag -- Image tag
+    tag: 1.9.0-rc1
 
   # The name of the datacenter that the agents should
   # register as. This can't be changed once the Consul cluster is up and running
@@ -782,18 +797,23 @@ global:
         #
         # @default: ["source:consul","consul_service:consul-server"]
         # @type: array<string>
-        dogstatsdTags: ["source:consul","consul_service:consul-server"]
+        dogstatsdTags: ["source:consul", "consul_service:consul-server"]
       # Namespace
       #
       # @default: "default"
       # @type: string
       namespace: "default"
 
-
   # The name (and tag) of the consul-dataplane Docker image used for the
   # connect-injected sidecar proxies and mesh, terminating, and ingress gateways.
   # @default: hashicorp/consul-dataplane:<latest supported version>
-  imageConsulDataplane: hashicorp/consul-dataplane:1.9.0-rc1
+  imageConsulDataplane:
+    # imageConsulDataplane.registry -- Image registry
+    registry: ""
+    # imageConsulDataplane.repository -- Image repository
+    repository: hashicorp/consul-dataplane
+    # imageConsulDataplane.tag -- Image tag
+    tag: 1.9.0-rc1
 
   # Configuration for running this Helm chart on the Red Hat OpenShift platform.
   # This Helm chart currently supports OpenShift v4.x+.
@@ -940,8 +960,14 @@ server:
 
   # The name of the Docker image (including any tag) for the containers running
   # Consul server agents.
-  # @type: string
-  image: null
+  # @type: map
+  image:
+    # server.image.registry -- Image registry
+    registry: ""
+    # server.image.repository -- Image repository
+    repository: ""
+    # server.image.tag -- Image tag
+    tag: ""
 
   # The number of server agents to run. This determines the fault tolerance of
   # the cluster. Please refer to the [deployment table](https://developer.hashicorp.com/consul/docs/architecture/consensus#deployment-table)
@@ -1445,7 +1471,7 @@ server:
     # Use this parameter to configure credentials that the rest of the
     # stateful set would not need access to, like `GOOGLE_APPLICATION_CREDENTIALS`.
     # @type: map
-    extraEnvironmentVars: { }
+    extraEnvironmentVars: {}
 
     # A list of extra volumes to mount onto the snapshot agent. Use this block
     # to include extra data that only the snapshot agent needs access
@@ -1468,7 +1494,7 @@ server:
     #
     # The snapshot agent will not attempt to load any volumes passed in this stanza
     # @type: array<map>
-    extraVolumes: [ ]
+    extraVolumes: []
 
   # [Enterprise Only] Added in Consul 1.8, the audit object allow users to enable auditing
   # and configure a sink and filters for their audit logs. Please refer to
@@ -1637,8 +1663,14 @@ client:
 
   # The name of the Docker image (including any tag) for the containers
   # running Consul client agents.
-  # @type: string
-  image: null
+  # @type: map
+  image:
+    # client.image.registry -- Image registry
+    registry: ""
+    # client.image.repository -- Image repository
+    repository: ""
+    # client.image.tag -- Image tag
+    tag: ""
 
   # A list of valid [`-retry-join` values](https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_retry_join).
   # If this is `null` (default), then the clients will attempt to automatically
@@ -1978,7 +2010,7 @@ dns:
 
     # Refers to an existing Kubernetes secret that contains an ACL token
     # for your Consul cluster. This token provides permissions for the DNS
-    # proxy. This field is required when `global.acls.manageSystemACLs` 
+    # proxy. This field is required when `global.acls.manageSystemACLs`
     # is set to `false` to enable manual ACL management in a Consul cluster.
     # node_prefix "" {
     #   policy = "read"
@@ -2148,8 +2180,14 @@ syncCatalog:
 
   # The name of the Docker image (including any tag) for consul-k8s-control-plane
   # to run the sync program.
-  # @type: string
-  image: null
+  # @type: map
+  image:
+    # syncCatalog.image.registry -- Image registry
+    registry: ""
+    # syncCatalog.image.repository -- Image repository
+    repository: ""
+    # syncCatalog.image.tag -- Image tag
+    tag: ""
 
   # If true, all valid services in K8S are
   # synced by default. If false, the service must be [annotated](https://developer.hashicorp.com/consul/docs/k8s/service-sync#enable-and-disable-sync)
@@ -2272,7 +2310,7 @@ syncCatalog:
   # Set this to false to skip syncing ClusterIP services.
   syncClusterIPServices: true
 
-  # If true, LoadBalancer service endpoints instead of ingress addresses will be synced to Consul. 
+  # If true, LoadBalancer service endpoints instead of ingress addresses will be synced to Consul.
   # If false, LoadBalancer endpoints are not synced to Consul.
   syncLoadBalancerEndpoints: false
 
@@ -2403,8 +2441,6 @@ syncCatalog:
   # @type: string
   annotations: null
 
-
-
 # Configures the automatic Connect sidecar injector.
 connectInject:
   # True if you want to enable connect injection. Set to "-" to inherit from
@@ -2415,8 +2451,14 @@ connectInject:
   replicas: 1
 
   # Image for consul-k8s-control-plane that contains the injector.
-  # @type: string
-  image: null
+  # @type: map
+  image:
+    # connectInject.image.registry -- Image registry
+    registry: ""
+    # connectInject.image.repository -- Image repository
+    repository: ""
+    # connectInject.image.tag -- Image tag
+    tag: ""
 
   # If true, the injector will inject the
   # Connect sidecar into all pods by default. Otherwise, pods must specify the
@@ -2527,7 +2569,7 @@ connectInject:
         # This value sets the path to use for scraping gateway metrics via prometheus, defaults to /metrics if not set.
         # @type: string
         path: null
-        
+
       # The resource settings for Pods handling traffic for Gateway API.
       # @recurse: false
       # @type: map
@@ -2767,8 +2809,14 @@ connectInject:
 
   # The Docker image for Consul to use when performing Connect injection.
   # Defaults to global.image.
-  # @type: string
-  imageConsul: null
+  # @type: map
+  imageConsul:
+    # imageConsul.image.registry -- Image registry
+    registry: ""
+    # imageConsul.image.repository -- Image repository
+    repository: ""
+    # imageConsul.image.tag -- Image tag
+    tag: ""
 
   # Sets the `logLevel` for the `consul-dataplane` sidecar and the `consul-connect-inject-init` container. When set, this value overrides the global log verbosity level. One of "debug", "info", "warn", or "error".
   # @type: string
@@ -3039,9 +3087,6 @@ connectInject:
     # Configures the timeout for each k8s startup probe check.
     # @type: integer
     probeCheckTimeoutSeconds: 5
-
-
-
 
   # The resource settings for the Connect injected init container. If null, the resources
   # won't be set for the initContainer. The defaults are optimized for developer instances of
@@ -3666,7 +3711,13 @@ telemetryCollector:
   # The name of the Docker image (including any tag) for the containers running
   # the consul-telemetry-collector
   # @type: string
-  image: "hashicorp/consul-telemetry-collector:0.0.2"
+  image:
+    # telemetryCollector.image.registry -- Image registry
+    registry: ""
+    # telemetryCollector.image.repository -- Image repository
+    repository: "hashicorp/consul-telemetry-collector"
+    # telemetryCollector.image.tag -- Image tag
+    tag: "0.0.2"
 
   # The resource settings for consul-telemetry-collector pods.
   # @recurse: false
@@ -3787,4 +3838,3 @@ telemetryCollector:
   # it could be used to configure custom consul parameters.
   # @type: map
   extraEnvironmentVars: {}
-
