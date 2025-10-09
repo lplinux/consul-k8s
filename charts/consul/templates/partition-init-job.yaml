@@ -84,7 +84,7 @@ spec:
       {{- end }}
       containers:
         - name: partition-init-job
-          image: {{ .Values.global.imageK8S }}
+          image: "{{ template "consul-k8s.image" .}}"
           {{ template "consul.imagePullPolicy" . }}
           {{- include "consul.restrictedSecurityContext" . | nindent 10 }}
           env:

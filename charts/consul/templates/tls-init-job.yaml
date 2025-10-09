@@ -63,7 +63,7 @@ spec:
       {{- end }}
       containers:
         - name: tls-init
-          image: "{{ .Values.global.imageK8S }}"
+          image: "{{ template "consul-k8s.image" .}}"
           {{ template "consul.imagePullPolicy" . }}
           {{- if not .Values.server.containerSecurityContext.tlsInit }}
           {{- include "consul.restrictedSecurityContext" . | nindent 10 }}

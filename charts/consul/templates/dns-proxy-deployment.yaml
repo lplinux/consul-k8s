@@ -80,7 +80,7 @@ spec:
       {{- end }}
       containers:
         - name: dns-proxy
-          image: {{ .Values.global.imageConsulDataplane | quote }}
+          image: "{{ template "consul-dataplane.image" . }}"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

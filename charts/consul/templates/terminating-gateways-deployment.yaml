@@ -168,7 +168,7 @@ spec:
       initContainers:
         # terminating-gateway-init registers the terminating gateway service with Consul.
         - name: terminating-gateway-init
-          image: {{ $root.Values.global.imageK8S }}
+          image: {{ template "consul-k8s.image" $root }}
           {{ template "consul.imagePullPolicy" $root }}
           {{- include "consul.restrictedSecurityContext" $ | nindent 10 }}
           env:
@@ -230,7 +230,7 @@ spec:
               cpu: "50m"
       containers:
         - name: terminating-gateway
-          image: {{ $root.Values.global.imageConsulDataplane | quote }}
+          image: {{ template "consul-dataplane.image" $root }}
           {{ template "consul.imagePullPolicy" $root }}
           {{- include "consul.restrictedSecurityContext" $ | nindent 10 }}
           volumeMounts:

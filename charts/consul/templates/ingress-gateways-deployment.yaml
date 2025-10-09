@@ -184,7 +184,7 @@ spec:
       initContainers:
       # ingress-gateway-init registers the ingress gateway service with Consul.
       - name: ingress-gateway-init
-        image: {{ $root.Values.global.imageK8S }}
+        image: {{ template "consul-k8s.image" $root }}
         {{ template "consul.imagePullPolicy" $root }}
         {{- include "consul.restrictedSecurityContext" $ | nindent 8 }}
         env:
@@ -246,7 +246,7 @@ spec:
             cpu: "50m"
       containers:
       - name: ingress-gateway
-        image: {{ $root.Values.global.imageConsulDataplane | quote }}
+        image: "{{ template "consul-dataplane.image" $root }}"
         {{ template "consul.imagePullPolicy" $root }}
         {{- if $needsPrivilegedPorts }}
         {{- include "consul.restrictedSecurityContextWithNetBindService" $ | nindent 8 }}

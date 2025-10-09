@@ -68,7 +68,7 @@ spec:
       serviceAccountName: {{ template "consul.fullname" . }}-sync-catalog-cleanup
       containers:
       - name: sync-catalog-cleanup-job
-        image: "{{ default .Values.global.imageK8S .Values.syncCatalog.image }}"
+        image: "{{ template "syncCatalog.image" . }}"
         {{ template "consul.imagePullPolicy" . }}
         {{- include "consul.restrictedSecurityContext" . | nindent 8 }}
         env:

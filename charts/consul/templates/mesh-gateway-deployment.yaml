@@ -135,7 +135,7 @@ spec:
           capabilities:
             drop:
               - ALL
-        image: {{ .Values.global.imageK8S }}
+        image: "{{ template "consul-k8s.image" .}}"
         {{ template "consul.imagePullPolicy" . }}
         env:
         - name: NAMESPACE
@@ -194,7 +194,7 @@ spec:
         {{- end }}
       containers:
       - name: mesh-gateway
-        image: {{ .Values.global.imageConsulDataplane | quote }}
+        image: {{ template "consul-dataplane.image" . }}
         {{ template "consul.imagePullPolicy" . }}
         securityContext:
           allowPrivilegeEscalation: false

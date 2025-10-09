@@ -142,7 +142,7 @@ spec:
               -service-account-name="consul-telemetry-collector" \
               -service-name=""
 
-        image: {{ .Values.global.imageK8S }}
+        image: "{{ template "consul-k8s.image" .}}"
         {{ template "consul.imagePullPolicy" . }}
         {{- if .Values.telemetryCollector.initContainer.resources }}
         resources:
@@ -170,7 +170,7 @@ spec:
             {{- end }}
       containers:
       - name: consul-telemetry-collector
-        image: {{ .Values.telemetryCollector.image }}
+        image: {{ template "telemetryCollector.image" . }}
         {{ template "consul.imagePullPolicy" . }}
         ports:
         - containerPort: 9090
@@ -298,7 +298,7 @@ spec:
         {{- end }}
       # consul-dataplane container
       - name: consul-dataplane
-        image: "{{ .Values.global.imageConsulDataplane }}"
+        image: "{{ template "consul-dataplane.image" . }}"
         {{ template "consul.imagePullPolicy" . }}
         command:
           - consul-dataplane

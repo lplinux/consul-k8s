@@ -38,7 +38,7 @@ spec:
       serviceAccountName: {{ template "consul.fullname" . }}-gateway-resources
       containers:
         - name: gateway-resources
-          image: {{ .Values.global.imageK8S }}
+          image: "{{ template "consul-k8s.image" .}}"
           {{ template "consul.imagePullPolicy" . }}
           {{- include "consul.restrictedSecurityContext" . | nindent 10 }}
           command:
