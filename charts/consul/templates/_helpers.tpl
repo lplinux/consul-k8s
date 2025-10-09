@@ -4,6 +4,85 @@ We truncate at 63 chars because some Kubernetes name fields are limited to
 this (by the DNS naming spec). Supports the legacy fullnameOverride setting
 as well as the global.name setting.
 */}}
+
+{{- define "global.image.name.builder" -}}
+{{- $image := .image -}}
+{{- $global := .global -}}
+{{- $registryName := default "" $image.registry -}}
+{{- $repositoryName := default $global.image.repository $image.repository -}}
+{{- $tag := default $global.image.tag $image.tag | toString -}}
+{{- if $global.imageRegistry }}
+    {{- printf "%s/%s:%s" $global.imageRegistry $repositoryName $tag -}}
+{{- else if $registryName }}
+    {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
+{{- else -}}
+    {{- printf "%s:%s" $repositoryName $tag -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "global.imageK8S.name.builder" -}}
+{{- $image := .image -}}
+{{- $global := .global -}}
+{{- $registryName := default "" $image.registry -}}
+{{- $repositoryName := default $global.imageK8S.repository $image.repository -}}
+{{- $tag := default $global.imageK8S.tag $image.tag | toString -}}
+{{- if $global.imageRegistry }}
+    {{- printf "%s/%s:%s" $global.imageRegistry $repositoryName $tag -}}
+{{- else if $registryName }}
+    {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
+{{- else -}}
+    {{- printf "%s:%s" $repositoryName $tag -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the proper consul image name
+*/}}
+{{- define "consul.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.global.image "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "consul-k8s.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.global.imageK8S "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "consul-dataplane.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.global.imageConsulDataplane "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "server.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.server.image "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "client.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.client.image "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "syncCatalog.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.syncCatalog.image "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "connectInject.image" -}}
+{{- $registryName := default .Values.global.imageK8S.registry .Values.connectInject.image.registry -}}
+{{- $repositoryName := default .Values.global.imageK8S.repository .Values.connectInject.image.repository -}}
+{{- $tag := default .Values.global.imageK8S.tag .Values.connectInject.image.tag | toString -}}
+{{- if .Values.global.imageRegistry }}
+    {{- printf "%s/%s:%s" .Values.global.imageRegistry $repositoryName $tag -}}
+{{- else if $registryName }}
+    {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
+{{- else -}}
+    {{- printf "%s:%s" $repositoryName $tag -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "connectInject.imageConsul" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.connectInject.imageConsul "global" .Values.global) -}}
+{{- end -}}
+
+{{- define "telemetryCollector.image" -}}
+{{- include "global.image.name.builder" (dict "image" .Values.telemetryCollector.image "global" .Values.global) -}}
+{{- end -}}
+
 {{- define "consul.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
@@ -270,7 +349,7 @@ This template is for an init container.
 */}}
 {{- define "consul.getAutoEncryptClientCA" -}}
 - name: get-auto-encrypt-client-ca
-  image: {{ .Values.global.imageK8S }}
+  image: {{ template "consul-k8s.image" . }}
   {{ template "consul.imagePullPolicy" . }}
   command:
     - "/bin/sh"
@@ -652,7 +731,7 @@ Requirements for valid labels:
 Usage: {{ template "consul.versionInfo" }}
 */}}
 {{- define "consul.versionInfo" -}}
-{{- $imageVersion := regexSplit ":" .Values.global.image -1 }}
+{{- $imageVersion := .Values.global.image.tag . }}
 {{- $versionInfo := printf "%s" (index $imageVersion 1 ) | trimSuffix "\"" }}
 {{- $sanitizedVersion := "" }}
 {{- $pattern := "^([A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9])?$" }}
