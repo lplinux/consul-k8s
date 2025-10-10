@@ -59,20 +59,11 @@ Return the proper consul image name
 {{- end -}}
 
 {{- define "syncCatalog.image" -}}
-{{- include "global.image.name.builder" (dict "image" .Values.syncCatalog.image "global" .Values.global) -}}
+{{- include "global.imageK8S.name.builder" (dict "image" .Values.syncCatalog.image "global" .Values.global) -}}
 {{- end -}}
 
 {{- define "connectInject.image" -}}
-{{- $registryName := default .Values.global.imageK8S.registry .Values.connectInject.image.registry -}}
-{{- $repositoryName := default .Values.global.imageK8S.repository .Values.connectInject.image.repository -}}
-{{- $tag := default .Values.global.imageK8S.tag .Values.connectInject.image.tag | toString -}}
-{{- if .Values.global.imageRegistry }}
-    {{- printf "%s/%s:%s" .Values.global.imageRegistry $repositoryName $tag -}}
-{{- else if $registryName }}
-    {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
-{{- else -}}
-    {{- printf "%s:%s" $repositoryName $tag -}}
-{{- end -}}
+{{- include "global.imageK8S.name.builder" (dict "image" .Values.connectInject.image "global" .Values.global) -}}
 {{- end -}}
 
 {{- define "connectInject.imageConsul" -}}
