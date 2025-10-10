@@ -96,7 +96,7 @@ spec:
       serviceAccountName: {{ template "consul.fullname" . }}-connect-injector
       containers:
         - name: sidecar-injector
-          image: {{ template "connectInject.image" . }}
+          image: "{{ template "connectInject.image" . }}"
           {{ template "consul.imagePullPolicy" . }}
           ports:
             - containerPort: 8080
