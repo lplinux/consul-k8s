@@ -29,25 +29,28 @@ target=templates/sync-catalog-cleanup-on-uninstall-job.yaml
   cd $(chart_dir)
   local actual=$(helm template \
     -s $target \
-    --set 'global.imageK8S=bar' \
+    --set 'global.imageK8S.repository=bar' \
+    --set 'global.imageK8S.tag=1.0' \
     --set 'syncCatalog.enabled=true' \
     --set 'syncCatalog.cleanupNodeOnRemoval=true' \
     . | tee /dev/stderr |
     yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalogCleanupJob/Uninstall: image can be overridden with server.image" {
   cd $(chart_dir)
   local actual=$(helm template \
     -s $target \
-    --set 'global.imageK8S=foo' \
+    --set 'global.imageK8S.repository=foo' \
+    --set 'global.imageK8S.tag=1.0' \
     --set 'syncCatalog.enabled=true' \
     --set 'syncCatalog.cleanupNodeOnRemoval=true' \
-    --set 'syncCatalog.image=bar' \
+    --set 'syncCatalog.image.repository=bar' \
+    --set 'syncCatalog.image.tag=1.0' \
     . | tee /dev/stderr |
     yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalogCleanupJob/Uninstall: consul env defaults" {

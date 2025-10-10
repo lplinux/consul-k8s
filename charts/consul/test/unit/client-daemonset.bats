@@ -34,10 +34,11 @@ load _helpers
   local actual=$(helm template \
       -s templates/client-daemonset.yaml  \
       --set 'client.enabled=true' \
-      --set 'global.image=foo' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "foo" ]
+  [ "${actual}" = "foo:1.0" ]
 }
 
 @test "client/DaemonSet: image can be overridden with client.image" {
@@ -45,11 +46,13 @@ load _helpers
   local actual=$(helm template \
       -s templates/client-daemonset.yaml  \
       --set 'client.enabled=true' \
-      --set 'global.image=foo' \
-      --set 'client.image=bar' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
+      --set 'client.image.repository=bar' \
+      --set 'client.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "client/DaemonSet: no updateStrategy when not updating" {
@@ -2774,7 +2777,8 @@ rollingUpdate:
   run helm template \
       -s templates/client-daemonset.yaml  \
       --set 'client.enabled=true' \
-      --set 'global.imageK8s=something' \
+      --set 'global.imageK8s.repository=something' \
+      --set 'global.imageK8s.tag=1.0' \
       .
   [ "$status" -eq 1 ]
   [[ "$output" =~ "global.imageK8s is not a valid key, use global.imageK8S (note the capital 'S')" ]]

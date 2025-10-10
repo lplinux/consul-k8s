@@ -43,23 +43,26 @@ load _helpers
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/sync-catalog-deployment.yaml  \
-      --set 'global.imageK8S=bar' \
+      --set 'global.imageK8S.repository=bar' \
+      --set 'global.imageK8S.tag=1.0' \
       --set 'syncCatalog.enabled=true' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalog/Deployment: image can be overridden with server.image" {
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/sync-catalog-deployment.yaml  \
-      --set 'global.imageK8S=foo' \
+      --set 'global.imageK8S.repository=foo' \
+      --set 'global.imageK8S.tag=1.0' \
       --set 'syncCatalog.enabled=true' \
-      --set 'syncCatalog.image=bar' \
+      --set 'syncCatalog.image.repository=bar' \
+      --set 'syncCatalog.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalog/Deployment: consul env defaults" {

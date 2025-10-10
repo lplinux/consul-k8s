@@ -78,10 +78,11 @@ load _helpers
       -s templates/terminating-gateways-deployment.yaml \
       --set 'terminatingGateways.enabled=true' \
       --set 'connectInject.enabled=true' \
-      --set 'global.imageConsulDataplane=new/image' \
+      --set 'global.imageConsulDataplane.repository=new/image' \
+      --set 'global.imageConsulDataplane.tag=1.0' \
       . | tee /dev/stderr |
       yq -s -r '.[0].spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "new/image" ]
+  [ "${actual}" = "new/image:1.0" ]
 }
 
 #--------------------------------------------------------------------

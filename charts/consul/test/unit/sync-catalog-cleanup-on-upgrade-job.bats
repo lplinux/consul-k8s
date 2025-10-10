@@ -40,27 +40,30 @@ target=templates/sync-catalog-cleanup-on-upgrade-job.yaml
   cd $(chart_dir)
   local actual=$(helm template \
     -s $target \
-    --set 'global.imageK8S=bar' \
+    --set 'global.imageK8S.repository=bar' \
+    --set 'global.imageK8S.tag=1.0' \
     --set 'syncCatalog.enabled=false' \
     --set 'syncCatalog.cleanupNodeOnRemoval=true' \
     --is-upgrade \
     . | tee /dev/stderr |
     yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalogCleanupJob/Upgrade: image can be overridden with server.image" {
   cd $(chart_dir)
   local actual=$(helm template \
     -s $target \
-    --set 'global.imageK8S=foo' \
+    --set 'global.imageK8S.repository=foo' \
+    --set 'global.imageK8S.tag=1.0' \
     --set 'syncCatalog.enabled=false' \
     --set 'syncCatalog.cleanupNodeOnRemoval=true' \
-    --set 'syncCatalog.image=bar' \
+    --set 'syncCatalog.image.repository=bar' \
+    --set 'syncCatalog.image.tag=1.0' \
     --is-upgrade \
     . | tee /dev/stderr |
     yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 @test "syncCatalogCleanupJob/Upgrade: consul env defaults" {

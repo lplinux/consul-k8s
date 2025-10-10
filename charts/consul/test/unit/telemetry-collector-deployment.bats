@@ -14,10 +14,11 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=null' \
+      --set 'telemetryCollector.image.repository=null' \
+      --set 'telemetryCollector.image.tag=null' \
       .
   [ "$status" -eq 1 ]
-  [[ "$output" =~ "telemetryCollector.image must be set to enable consul-telemetry-collector" ]]
+  [[ "$output" =~ "telemetryCollector.image.repository must be set to enable consul-telemetry-collector" ]]
 }
 
 @test "telemetryCollector/Deployment: disable with telemetry-collector.enabled" {
@@ -41,10 +42,11 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "\"bar\"" ]
+  [ "${actual}" = "\"bar:1.0\"" ]
 }
 
 #--------------------------------------------------------------------
@@ -55,7 +57,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.nodeSelector' | tee /dev/stderr)
   [ "${actual}" = "null" ]
@@ -66,7 +69,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.nodeSelector=testing' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.nodeSelector' | tee /dev/stderr)
@@ -95,7 +99,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.volumes[] | select(.name == "consul-ca-cert")' | tee /dev/stderr)
@@ -107,7 +112,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[1].volumeMounts[] | select(.name == "consul-ca-cert")' | tee /dev/stderr)
@@ -119,7 +125,8 @@ load _helpers
   local ca_cert_volume=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.caCert.secretName=foo-ca-cert' \
       --set 'global.tls.caCert.secretKey=key' \
@@ -146,7 +153,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'client.enabled=false' \
@@ -161,7 +169,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'externalServers.enabled=true' \
@@ -180,7 +189,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].resources' | tee /dev/stderr)
 
@@ -195,7 +205,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.resources.foo=bar' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].resources.foo' | tee /dev/stderr)
@@ -210,7 +221,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.acls.manageSystemACLs=true' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.initContainers[0].resources' | tee /dev/stderr)
@@ -226,7 +238,8 @@ load _helpers
   local object=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.acls.manageSystemACLs=true' \
       --set 'telemetryCollector.initContainer.resources.requests.memory=memory' \
       --set 'telemetryCollector.initContainer.resources.requests.cpu=cpu' \
@@ -256,7 +269,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.priorityClassName' | tee /dev/stderr)
 
@@ -268,7 +282,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.priorityClassName=name' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.priorityClassName' | tee /dev/stderr)
@@ -284,7 +299,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.replicas' | tee /dev/stderr)
 
@@ -296,7 +312,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.replicas=3' \
       . | tee /dev/stderr |
       yq '.spec.replicas' | tee /dev/stderr)
@@ -312,7 +329,8 @@ load _helpers
   local object=$(helm template \
     -s templates/telemetry-collector-deployment.yaml  \
     --set 'telemetryCollector.enabled=true' \
-    --set 'telemetryCollector.image=foo' \
+    --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
     --set 'global.tls.enabled=true' \
     --set 'global.tls.enableAutoEncrypt=true' \
     --set 'global.tls.caCert.secretName=foo' \
@@ -334,7 +352,8 @@ load _helpers
   local object=$(helm template \
     -s templates/telemetry-collector-deployment.yaml  \
     --set 'telemetryCollector.enabled=true' \
-    --set 'telemetryCollector.image=foo' \
+    --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
     --set 'global.tls.enabled=true' \
     --set 'global.tls.enableAutoEncrypt=true' \
     --set 'global.tls.caCert.secretName=foo' \
@@ -357,7 +376,8 @@ load _helpers
   local cmd=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.secretsBackend.vault.enabled=true' \
       --set 'global.secretsBackend.vault.consulClientRole=foo' \
       --set 'global.secretsBackend.vault.consulServerRole=bar' \
@@ -379,7 +399,8 @@ load _helpers
   local cmd=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.secretsBackend.vault.enabled=true' \
       --set 'global.secretsBackend.vault.consulClientRole=foo' \
       --set 'global.secretsBackend.vault.consulServerRole=bar' \
@@ -402,7 +423,8 @@ load _helpers
   local cmd=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.secretsBackend.vault.enabled=true' \
       --set 'global.secretsBackend.vault.consulClientRole=foo' \
       --set 'global.secretsBackend.vault.consulServerRole=bar' \
@@ -425,7 +447,8 @@ load _helpers
   local object=$(helm template \
     -s templates/telemetry-collector-deployment.yaml  \
     --set 'telemetryCollector.enabled=true' \
-    --set 'telemetryCollector.image=foo' \
+    --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
     --set 'global.tls.enabled=true' \
     --set 'global.tls.enableAutoEncrypt=true' \
     --set 'global.tls.caCert.secretName=foo' \
@@ -448,7 +471,8 @@ load _helpers
   local object=$(helm template \
     -s templates/telemetry-collector-deployment.yaml  \
     --set 'telemetryCollector.enabled=true' \
-    --set 'telemetryCollector.image=foo' \
+    --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
     --set 'global.tls.enabled=true' \
     --set 'global.tls.enableAutoEncrypt=true' \
     --set 'global.tls.caCert.secretName=foo' \
@@ -472,7 +496,8 @@ load _helpers
   local cmd=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.secretsBackend.vault.enabled=true' \
       --set 'global.secretsBackend.vault.consulClientRole=foo' \
       --set 'global.secretsBackend.vault.consulServerRole=bar' \
@@ -511,7 +536,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=foo' \
+      --set 'telemetryCollector.image.repository=foo' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.tls.caCert.secretName=foo' \
@@ -540,7 +566,8 @@ load _helpers
       --set 'global.cloud.clientId.secretName=client-id-name' \
       --set 'global.cloud.clientId.secretKey=client-id-key' \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].env' | tee /dev/stderr)
 
@@ -575,7 +602,8 @@ load _helpers
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'global.cloud.enabled=false' \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.resourceId.secretName=client-resource-id-name' \
       --set 'telemetryCollector.cloud.resourceId.secretKey=client-resource-id-key' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-name' \
@@ -615,7 +643,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -635,7 +664,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -655,7 +685,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -675,7 +706,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -696,7 +728,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -720,7 +753,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -744,7 +778,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -768,7 +803,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -792,7 +828,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -816,7 +853,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'global.tls.enableAutoEncrypt=true' \
       --set 'global.datacenter=dc-foo' \
@@ -840,7 +878,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretName=client-id-name' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-id-name' \
       --set 'telemetryCollector.cloud.clientSecret.secretKey=client-secret-id-key' \
@@ -859,7 +898,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretName=client-id-name' \
       --set 'telemetryCollector.cloud.clientId.secretKey=client-id-key' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-id-name' \
@@ -878,7 +918,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretKey=client-id-key' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-id-name' \
       --set 'telemetryCollector.cloud.clientSecret.secretKey=client-secret-key-name'  \
@@ -897,7 +938,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretName=client-id-name' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-name' \
       --set 'global.cloud.resourceId.secretName=resource-id-name' \
@@ -913,7 +955,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretName=client-id-name' \
       --set 'telemetryCollector.cloud.clientId.secretKey=client-id-key' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-name' \
@@ -930,7 +973,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.cloud.clientId.secretName=client-id-name' \
       --set 'telemetryCollector.cloud.clientId.secretKey=client-id-key' \
       --set 'telemetryCollector.cloud.clientSecret.secretName=client-secret-name' \
@@ -947,7 +991,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.cloud.resourceId.secretName=resource-id-1' \
       --set 'global.cloud.resourceId.secretKey=key' \
       --set 'telemetryCollector.cloud.resourceId.secretName=resource-id-2' \
@@ -967,7 +1012,8 @@ load _helpers
   run helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.cloud.resourceId.secretName=name' \
       --set 'global.cloud.resourceId.secretKey=key-1' \
       --set 'telemetryCollector.cloud.resourceId.secretName=name' \
@@ -991,7 +1037,8 @@ load _helpers
   local flags=$(helm template  \
     -s templates/telemetry-collector-deployment.yaml \
     --set 'telemetryCollector.enabled=true'     \
-    --set 'telemetryCollector.image=bar'    \
+    --set 'telemetryCollector.image.repository=bar' \
+    --set 'telemetryCollector.image.tag=1.0' \
     --set 'global.tls.enabled=false'    \
     . | yq -r .spec.template.spec.containers[1].args)
 
@@ -1005,7 +1052,8 @@ load _helpers
   local flags=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[1].args' | tee /dev/stderr)
@@ -1022,7 +1070,8 @@ load _helpers
   local flags=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.tls.enabled=true' \
       --set 'externalServers.enabled=true' \
       --set 'externalServers.hosts[0]=external-consul.host' \
@@ -1052,7 +1101,8 @@ load _helpers
   local flags=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.enableConsulNamespaces=true' \
       --set 'global.adminPartitions.enabled=true' \
       --set 'global.adminPartitions.name=hashi' \
@@ -1072,7 +1122,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.acls.manageSystemACLs=true' \
       --set 'global.tls.enabled=true' \
       --set 'server.enabled=false' \
@@ -1089,7 +1140,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.customExporterConfig="foo"' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].volumeMounts[] | select(.name == "config") | .name' | tee /dev/stderr)
@@ -1101,7 +1153,8 @@ load _helpers
   local flags=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'telemetryCollector.customExporterConfig="foo"' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[0].command')
@@ -1115,7 +1168,8 @@ load _helpers
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.acls.manageSystemACLs=true' \
       --set 'global.tls.enabled=true' \
       --set 'server.enabled=false' \
@@ -1196,7 +1250,8 @@ MIICFjCCAZsCCQCdwLtdjbzlYzAKBggqhkjOPQQDAjB0MQswCQYDVQQGEwJDQTEL' \
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.metadata.labels | del(."app") | del(."chart") | del(."release") | del(."component") | del(."consul.hashicorp.com/connect-inject-managed-by")' \
       | tee /dev/stderr)
@@ -1208,7 +1263,8 @@ MIICFjCCAZsCCQCdwLtdjbzlYzAKBggqhkjOPQQDAjB0MQswCQYDVQQGEwJDQTEL' \
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.extraLabels.foo=bar' \
       . | tee /dev/stderr)
   local actualBar=$(echo "${actual}" | yq -r '.metadata.labels.foo' | tee /dev/stderr)
@@ -1222,7 +1278,8 @@ MIICFjCCAZsCCQCdwLtdjbzlYzAKBggqhkjOPQQDAjB0MQswCQYDVQQGEwJDQTEL' \
   local actual=$(helm template \
       -s templates/telemetry-collector-deployment.yaml \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.extraLabels.foo=bar' \
       --set 'global.extraLabels.baz=qux' \
       . | tee /dev/stderr)
@@ -1323,7 +1380,8 @@ MIICFjCCAZsCCQCdwLtdjbzlYzAKBggqhkjOPQQDAjB0MQswCQYDVQQGEwJDQTEL' \
   local object=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.enableConsulNamespaces=true' \
       --set 'global.acls.manageSystemACLs=true' \
       --set 'connectInject.consulNamespaces.mirroringK8S=true' \
@@ -1343,7 +1401,8 @@ MIICFjCCAZsCCQCdwLtdjbzlYzAKBggqhkjOPQQDAjB0MQswCQYDVQQGEwJDQTEL' \
   local object=$(helm template \
       -s templates/telemetry-collector-deployment.yaml  \
       --set 'telemetryCollector.enabled=true' \
-      --set 'telemetryCollector.image=bar' \
+      --set 'telemetryCollector.image.repository=bar' \
+      --set 'telemetryCollector.image.tag=1.0' \
       --set 'global.enableConsulNamespaces=true' \
       --set 'global.acls.manageSystemACLs=true' \
       --set 'connectInject.consulNamespaces.mirroringK8S=false' \

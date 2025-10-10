@@ -73,21 +73,24 @@ load _helpers
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/server-statefulset.yaml  \
-      --set 'global.image=foo' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "foo" ]
+  [ "${actual}" = "foo:1.0" ]
 }
 
 @test "server/StatefulSet: image can be overridden with server.image" {
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/server-statefulset.yaml  \
-      --set 'global.image=foo' \
-      --set 'server.image=bar' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
+      --set 'server.image.repository=bar' \
+      --set 'server.image.tag=1.0' \
       . | tee /dev/stderr |
       yq -r '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "bar" ]
+  [ "${actual}" = "bar:1.0" ]
 }
 
 #--------------------------------------------------------------------
@@ -1040,7 +1043,8 @@ load _helpers
   cd `chart_dir`
   local annotations=$(helm template \
       -s templates/server-statefulset.yaml \
-      --set 'global.image=hashicorp/consul-enterprise:1.17.0-ent' \
+      --set 'global.image.repository=hashicorp/consul-enterprise' \
+      --set 'global.image.tag=1.17.0-ent' \
       --set 'global.metrics.enabled=true'  \
       --set 'global.metrics.enableAgentMetrics=true'  \
       --set 'global.metrics.datadog.enabled=true' \
@@ -1062,7 +1066,8 @@ load _helpers
   cd `chart_dir`
   local labels=$(helm template \
       -s templates/server-statefulset.yaml \
-      --set 'global.image=hashicorp/consul-enterprise:1.17.0-ent' \
+      --set 'global.image.repository=hashicorp/consul-enterprise' \
+      --set 'global.image.tag=1.17.0-ent' \
       --set 'global.metrics.enabled=true'  \
       --set 'telemetryCollector.enabled=true' \
       --set 'global.metrics.enableAgentMetrics=true'  \

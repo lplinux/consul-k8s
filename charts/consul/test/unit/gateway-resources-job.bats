@@ -34,9 +34,10 @@ target=templates/gateway-resources-job.yaml
     cd `chart_dir`
     local actual=$(helm template \
         -s $target \
-        --set 'global.imageK8S=foo' \
+        --set 'global.imageK8S.repository=foo' \
+        --set 'global.imageK8S.tag=1.0' \
         . | tee /dev/stderr |
-        yq '.spec.template.spec.containers[0].image == "foo"' | tee /dev/stderr)
+        yq '.spec.template.spec.containers[0].image == "foo:1.0"' | tee /dev/stderr)
     [ "$actual" = "true" ]
 }
 

@@ -232,10 +232,11 @@ load _helpers
   local actual=$(helm template \
       -s templates/connect-inject-deployment.yaml  \
       --set 'connectInject.enabled=true' \
-      --set 'global.imageK8S=foo' \
+      --set 'global.imageK8S.repository=foo' \
+      --set 'global.imageK8S.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "\"foo\"" ]
+  [ "${actual}" = "\"foo:1.0\"" ]
 }
 
 @test "connectInject/Deployment: container image overrides" {
@@ -243,21 +244,24 @@ load _helpers
   local actual=$(helm template \
       -s templates/connect-inject-deployment.yaml  \
       --set 'connectInject.enabled=true' \
-      --set 'global.imageK8S=foo' \
-      --set 'connectInject.image=bar' \
+      --set 'global.imageK8S.repository=foo' \
+      --set 'global.imageK8S.tag=1.0' \
+      --set 'connectInject.image.repository=bar' \
+      --set 'connectInject.image.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "\"bar\"" ]
+  [ "${actual}" = "\"bar:1.0\"" ]
 }
 
 @test "connectInject/Deployment: consul-image defaults to global" {
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/connect-inject-deployment.yaml  \
-      --set 'global.image=foo' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
       --set 'connectInject.enabled=true' \
       . | tee /dev/stderr |
-      yq '.spec.template.spec.containers[0].command | any(contains("-consul-image=\"foo\""))' | tee /dev/stderr)
+      yq '.spec.template.spec.containers[0].command | any(contains("-consul-image=\"foo:1.0\""))' | tee /dev/stderr)
   [ "${actual}" = "true" ]
 }
 
@@ -265,11 +269,13 @@ load _helpers
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/connect-inject-deployment.yaml  \
-      --set 'global.image=foo' \
+      --set 'global.image.repository=foo' \
+      --set 'global.image.tag=1.0' \
       --set 'connectInject.enabled=true' \
-      --set 'connectInject.imageConsul=bar' \
+      --set 'connectInject.imageConsul.repository=bar' \
+      --set 'connectInject.imageConsul.tag=1.0' \
       . | tee /dev/stderr |
-      yq '.spec.template.spec.containers[0].command | any(contains("-consul-image=\"bar\""))' | tee /dev/stderr)
+      yq '.spec.template.spec.containers[0].command | any(contains("-consul-image=\"bar:1.0\""))' | tee /dev/stderr)
   [ "${actual}" = "true" ]
 }
 
@@ -278,9 +284,10 @@ load _helpers
   local actual=$(helm template \
       -s templates/connect-inject-deployment.yaml  \
       --set 'connectInject.enabled=true' \
-      --set 'global.imageConsulDataplane=foo' \
+      --set 'global.imageConsulDataplane.repository=foo' \
+      --set 'global.imageConsulDataplane.tag=1.0' \
       . | tee /dev/stderr |
-      yq '.spec.template.spec.containers[0].command | any(contains("-consul-dataplane-image=\"foo\""))' | tee /dev/stderr)
+      yq '.spec.template.spec.containers[0].command | any(contains("-consul-dataplane-image=\"foo:1.0\""))' | tee /dev/stderr)
   [ "${actual}" = "true" ]
 }
 

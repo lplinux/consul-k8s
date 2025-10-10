@@ -60,10 +60,11 @@ load _helpers
   local actual=$(helm template \
       -s templates/dns-proxy-deployment.yaml  \
       --set 'dns.proxy.enabled=true' \
-      --set 'global.imageConsulDataplane=foo' \
+      --set 'global.imageConsulDataplane.repository=foo' \
+      --set 'global.imageConsulDataplane.tag=1.0' \
       . | tee /dev/stderr |
       yq '.spec.template.spec.containers[0].image' | tee /dev/stderr)
-  [ "${actual}" = "\"foo\"" ]
+  [ "${actual}" = "\"foo:1.0\"" ]
 }
 
 
