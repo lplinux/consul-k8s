@@ -15,10 +15,18 @@ global:
   # @default: ""
   imagePullPolicy: ""
 
-  # E.g.
-  # imagePullSecrets:
-  #   - myRegistryKeySecretName
+  # Array of objects containing image pull secret names that will be applied to each service account.
+  # This can be used to reference image pull secrets if using a custom consul or consul-k8s-control-plane Docker image.
+  # Refer to https://kubernetes.io/docs/concepts/containers/images/#using-a-private-registry.
   #
+  # Example:
+  #
+  # ```yaml
+  # imagePullSecrets:
+  #   - name: pull-secret-name
+  #   - name: pull-secret-name-2
+  # ```
+  # @type: array<map>
   imagePullSecrets: []
 
   # The main enabled/disabled setting. If true, servers,
