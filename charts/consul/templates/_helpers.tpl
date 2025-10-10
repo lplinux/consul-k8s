@@ -731,8 +731,7 @@ Requirements for valid labels:
 Usage: {{ template "consul.versionInfo" }}
 */}}
 {{- define "consul.versionInfo" -}}
-{{- $imageVersion := .Values.global.image.tag . }}
-{{- $versionInfo := printf "%s" (index $imageVersion 1 ) | trimSuffix "\"" }}
+{{- $versionInfo := .Values.global.image.tag -}}
 {{- $sanitizedVersion := "" }}
 {{- $pattern := "^([A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9])?$" }}
 {{- if not (regexMatch $pattern $versionInfo) -}}
